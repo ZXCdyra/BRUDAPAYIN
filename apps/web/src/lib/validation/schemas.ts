@@ -1,0 +1,404 @@
+import { z } from 'zod';
+import { RequisiteType, UserRole } from '@p2p/shared';
+import {
+  IBAN_GLOBAL_MAX,
+  IBAN_GLOBAL_MIN,
+  ibanExpectedLengthForCountry,
+} from './iban-registry';
+
+/** Positive decimal entered as a string (allows commas stripped by caller via Number). */
+export const positiveAmountString = z
+  .string()
+  .trim()
+  .min(1, 'Enter a positive amount')
+  .refine((s) => {
+    const n = Number(s.replace(/,/g, ''));
+    return Number.isFinite(n) && n > 0;
+  }, 'Amount must be greater than zero');
+
+function isPlausibleCryptoAddress(s: string): boolean {
+  const t = s.trim();
+  if (t.length < 26 && !/^0x[a-fA-F0-9]{40}$/.test(t)) return false;
+  if (/^T[1-9A-HJ-NP-Za-km-z]{25,}$/.test(t)) return true;
+  if (/^0x[a-fA-F0-9]{40}$/.test(t)) return true;
+  return /^[a-zA-Z0-9]{26,}$/.test(t);
+}
+
+export const optionalAuditCryptoAddress = z
+  .string()
+  .trim()
+  .refine((s) => s.length === 0 || isPlausibleCryptoAddress(s), {
+    message: 'Enter a valid TRON or EVM payout address, or leave blank',
+  });
+
+export const requiredCryptoAddress = z
+  .string()
+  .trim()
+  .min(1, 'USDT payout address is required')
+  .refine((s) => isPlausibleCryptoAddress(s), 'Enter a valid TRON or EVM address');
+
+export const loginCredentialsSchema = z.object({
+  login: z.string().trim().min(1, 'Введите логин'),
+  password: z.string().min(1, 'Password is required'),
+});
+
+export const loginTwoFactorSchema = z.object({
+  code: z.string().regex(/^\d{6}$/, 'Enter the 6-digit code from your app'),
+});
+
+export const ownerCreateUserFormSchema = z
+  .object({
+    login: z
+      .string()
+      .trim()
+      .regex(/^[a-zA-Z0-9_.-]{3,64}$/, 'Логин: 3–64 символа, латиница, цифры и . _ -'),
+    password: z.string().min(8, 'Используйте не менее 8 символов'),
+    role: z.nativeEnum(UserRole),
+    countryId: z.string(),
+    payoutRate: z.number(),
+    overdraftLimitUsdt: z.number(),
+    payinRate: z.number(),
+    traderPayoutRate: z.number(),
+    payoutMinLimit: z.number(),
+    payoutMaxLimit: z.number(),
+    processingMethod: z.enum(['CARD', 'FORK']),
+    cascadeRatingMultiplier: z.number(),
+    referralPercent: z.number(),
+    referralCurrency: z.string(),
+    merchantName: z.string(),
+  })
+  .superRefine((data, ctx) => {
+    if (data.role === UserRole.TRADER) {
+      if (
+        !Number.isFinite(data.overdraftLimitUsdt) ||
+        data.overdraftLimitUsdt < 0 ||
+        data.overdraftLimitUsdt > 1e12
+      ) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          path: ['overdraftLimitUsdt'],
+          message: 'Овердрафт должен быть от 0 до 1e12 USDT',
+        });
+      }
+      if (!Number.isFinite(data.payinRate) || data.payinRate < 0 || data.payinRate > 0.5) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          path: ['payinRate'],
+          message: 'Ставка Pay-In должна быть от 0 до 0.5',
+        });
+      }
+      if (
+        !Number.isFinite(data.traderPayoutRate) ||
+        data.traderPayoutRate < 0 ||
+        data.traderPayoutRate > 0.5
+      ) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          path: ['traderPayoutRate'],
+          message: 'Ставка Pay-Out должна быть от 0 до 0.5',
+        });
+      }
+      if (!Number.isFinite(data.payoutMinLimit) || data.payoutMinLimit < 0) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          path: ['payoutMinLimit'],
+          message: 'Минимальная сумма должна быть не менее нуля',
+        });
+      }
+      if (!Number.isFinite(data.payoutMaxLimit) || data.payoutMaxLimit < 0) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          path: ['payoutMaxLimit'],
+          message: 'Максимальная сумма должна быть не менее нуля',
+        });
+      }
+      if (data.payoutMaxLimit > 0 && data.payoutMinLimit > data.payoutMaxLimit) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          path: ['payoutMinLimit'],
+          message: 'Минимум не может превышать максимум при заданном максимуме',
+        });
+      }
+      if (
+        !Number.isFinite(data.cascadeRatingMultiplier) ||
+        data.cascadeRatingMultiplier < 0.01 ||
+        data.cascadeRatingMultiplier > 100
+      ) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          path: ['cascadeRatingMultiplier'],
+          message: 'Множитель рейтинга должен быть от 0.01 до 100',
+        });
+      }
+    }
+    if (data.role === UserRole.PAYOUT_TRADER) {
+      if (!data.countryId.trim()) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          path: ['countryId'],
+          message: 'Выберите страну',
+        });
+      }
+      if (!Number.isFinite(data.payoutRate) || data.payoutRate < 0) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          path: ['payoutRate'],
+          message: 'Ставка выплат должна быть не менее нуля',
+        });
+      }
+      if (data.payoutRate > 1) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          path: ['payoutRate'],
+          message: 'Ставка выплат не может превышать 1 (100%)',
+        });
+      }
+    }
+    if (data.role === UserRole.REFERRAL) {
+      if (
+        !Number.isFinite(data.referralPercent) ||
+        data.referralPercent < 0 ||
+        data.referralPercent > 100
+      ) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          path: ['referralPercent'],
+          message: 'Процент рефералов должен быть от 0 до 100',
+        });
+      }
+      if (!data.referralCurrency.trim()) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          path: ['referralCurrency'],
+          message: 'Введите код валюты',
+        });
+      }
+    }
+    if (data.role === UserRole.MERCHANT) {
+      if (!data.merchantName.trim()) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          path: ['merchantName'],
+          message: 'Введите отображаемое имя мерчанта',
+        });
+      }
+    }
+  });
+
+export const settlementTraderFieldsSchema = z.object({
+  traderId: z.string().trim().min(1, 'Select a trader'),
+  traderAmount: positiveAmountString,
+  traderCurrency: z.string().trim().min(1, 'Select a currency'),
+  traderNote: z.string(),
+});
+
+export const settlementPayoutFieldsSchema = z.object({
+  payoutSpecialistId: z.string().trim().min(1, 'Select a Pay-Out specialist'),
+  payoutAmount: positiveAmountString,
+  payoutUsdtAddress: optionalAuditCryptoAddress,
+  payoutNote: z.string(),
+});
+
+export const settlementMerchantFieldsSchema = z.object({
+  merchantId: z.string().trim().min(1, 'Select a merchant'),
+  merchantDebitAmount: positiveAmountString,
+  merchantCurrency: z.string().trim().min(1, 'Select a currency'),
+  manualRate: positiveAmountString,
+  usdtEquivalent: positiveAmountString,
+  merchantUsdtAddress: requiredCryptoAddress,
+  merchantNote: z.string(),
+});
+
+export const requisiteGroupCreateSchema = z.object({
+  name: z.string().trim().min(1, 'Enter a group name').max(120),
+  currency: z.string().trim().min(1, 'Select a currency'),
+  payment_method_id: z.string().trim().uuid('Select a payment method'),
+});
+
+export const requisiteGroupEditSchema = z.object({
+  name: z.string().trim().min(1, 'Enter a group name').max(120),
+  payment_method_id: z.string().trim().uuid('Select a payment method'),
+});
+
+function finiteNonNegative(n: number, path: string, ctx: z.RefinementCtx) {
+  if (!Number.isFinite(n) || n < 0) {
+    ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      path: [path],
+      message: 'Must be zero or greater',
+    });
+  }
+}
+
+/** PAN digits only (spaces allowed in raw input). */
+function paymentCardDigitsCompact(raw: string): string {
+  return raw.replace(/\D/g, '');
+}
+
+function normalizeIban(raw: string): string {
+  return raw.replace(/\s+/g, '').toUpperCase();
+}
+
+function ibanMod97(iban: string): number {
+  const rearranged = iban.slice(4) + iban.slice(0, 4);
+  const expanded = rearranged.replace(/[A-Z]/g, (ch) =>
+    (ch.charCodeAt(0) - 55).toString(),
+  );
+  let remainder = 0;
+  for (let i = 0; i < expanded.length; i++) {
+    remainder = (remainder * 10 + (expanded.charCodeAt(i) - 48)) % 97;
+  }
+  return remainder;
+}
+
+function validateRequisiteNumber(type: RequisiteType, raw: string, ctx: z.RefinementCtx) {
+  const trimmed = raw.trim();
+  if (!trimmed) {
+    ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      path: ['number'],
+      message: type === RequisiteType.CARD ? 'Enter card number' : 'Enter IBAN',
+    });
+    return;
+  }
+  if (type === RequisiteType.CARD) {
+    if (/[^\d\s-]/.test(trimmed)) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ['number'],
+        message: 'Card number may only contain digits, spaces, or hyphens',
+      });
+      return;
+    }
+    const compact = paymentCardDigitsCompact(trimmed);
+    if (compact.length < 13 || compact.length > 16) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ['number'],
+        message: 'Card number must be 13–16 digits',
+      });
+      return;
+    }
+    return;
+  }
+  if (type === RequisiteType.IBAN) {
+    const iban = normalizeIban(trimmed);
+    if (!/^[A-Z]{2}\d{2}[A-Z0-9]+$/.test(iban)) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ['number'],
+        message:
+          'Invalid IBAN: use two letters (country), two digits (check), then the account reference',
+      });
+      return;
+    }
+    const cc = iban.slice(0, 2);
+    const expectedLen = ibanExpectedLengthForCountry(cc);
+    if (expectedLen !== undefined) {
+      if (iban.length !== expectedLen) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          path: ['number'],
+          message: `IBAN for ${cc} must be exactly ${expectedLen} characters`,
+        });
+        return;
+      }
+    } else if (iban.length < IBAN_GLOBAL_MIN || iban.length > IBAN_GLOBAL_MAX) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ['number'],
+        message: `IBAN length must be between ${IBAN_GLOBAL_MIN} and ${IBAN_GLOBAL_MAX} characters`,
+      });
+      return;
+    }
+    if (ibanMod97(iban) !== 1) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ['number'],
+        message: 'Invalid IBAN (checksum)',
+      });
+    }
+  }
+}
+
+/**
+ * Validates the shared 4-tuple of requisite numeric limits:
+ * `min_amount`, `max_amount`, `limit_amount`, `limit_operations`.
+ *
+ * Used by both create and partial limits-update schemas to keep error messages and
+ * threshold checks (non-negative, integer for ops, max ≥ min) in a single place.
+ */
+function applyRequisiteLimitsRefinements(
+  data: {
+    min_amount: number;
+    max_amount: number;
+    limit_amount: number;
+    limit_operations: number;
+  },
+  ctx: z.RefinementCtx,
+): void {
+  finiteNonNegative(data.min_amount, 'min_amount', ctx);
+  finiteNonNegative(data.max_amount, 'max_amount', ctx);
+  finiteNonNegative(data.limit_amount, 'limit_amount', ctx);
+  if (
+    !Number.isFinite(data.limit_operations) ||
+    data.limit_operations < 0 ||
+    !Number.isInteger(data.limit_operations)
+  ) {
+    ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      path: ['limit_operations'],
+      message: 'Enter a whole number zero or greater',
+    });
+  }
+  if (
+    Number.isFinite(data.min_amount) &&
+    Number.isFinite(data.max_amount) &&
+    data.max_amount > 0 &&
+    data.min_amount > data.max_amount
+  ) {
+    ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      path: ['max_amount'],
+      message: 'Max amount must be greater than or equal to min',
+    });
+  }
+}
+
+export const requisiteCreateSchema = z
+  .object({
+    type: z.nativeEnum(RequisiteType),
+    number: z.string(),
+    owner: z.string().trim().min(2, 'Enter the account owner name'),
+    card_holder_name: z
+      .string()
+      .trim()
+      .min(2, 'Enter the card holder full name (surname, given name, patronymic)'),
+    bank_id: z
+      .string()
+      .trim()
+      .min(1, 'Select a bank')
+      .regex(/^\d+$/, 'Select a bank')
+      .refine((s) => Number(s) >= 1, 'Select a bank'),
+    accepts_other_banks: z.boolean(),
+    min_amount: z.number(),
+    max_amount: z.number(),
+    limit_amount: z.number(),
+    limit_operations: z.number(),
+  })
+  .superRefine((data, ctx) => {
+    validateRequisiteNumber(data.type, data.number, ctx);
+    applyRequisiteLimitsRefinements(data, ctx);
+  });
+
+export const requisiteLimitsSchema = z
+  .object({
+    accepts_other_banks: z.boolean(),
+    min_amount: z.number(),
+    max_amount: z.number(),
+    limit_amount: z.number(),
+    limit_operations: z.number(),
+  })
+  .superRefine((data, ctx) => {
+    applyRequisiteLimitsRefinements(data, ctx);
+  });

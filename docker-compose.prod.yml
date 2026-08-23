@@ -1,0 +1,157 @@
+services:
+  # Named Docker volumes are often root-owned; the Vault image runs as UID 100 / GID 1000.
+  # This one-shot fixes permissions on every compose up (chown is a no-op when already correct).
+  vault-data-perms:
+    image: alpine:3.20
+    user: "0:0"
+    volumes:
+      - vaultdata:/vault/data
+    command: ["sh", "-c", "chown -R 100:1000 /vault/data"]
+    restart: "no"
+
+  vault:
+    image: hashicorp/vault:1.15
+    depends_on:
+      vault-data-perms:
+        condition: service_completed_successfully
+    cap_add:
+      - IPC_LOCK
+    volumes:
+      - vaultdata:/vault/data
+      # Mount only here: the official image loads every *.hcl under /vault/config.
+      # Do not also pass `-config=/vault/config/...` or listeners bind twice (port 8200 in use).
+      - ./vault-config/vault.hcl:/vault/config/vault.hcl:ro
+    command: server
+    restart: always
+    # Not published: only api / worker containers on this network may call Vault.
+    deploy:
+      resources:
+        limits:
+          memory: 256M
+
+  api:
+    image: ${ECR_REGISTRY}/p2p-api:${IMAGE_TAG:-latest}
+    # Nest monorepo build outputs here; matches apps/api package.json start:prod
+    command: ["node", "dist/main.js"]
+    ports:
+      - "3001:3001"
+    env_file: .env.prod
+    restart: always
+    depends_on:
+      vault:
+        condition: service_started
+      redis:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:3001/api/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    deploy:
+      resources:
+        limits:
+          memory: 1024M
+        reservations:
+          memory: 512M
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  # Same image as api; runs BullMQ consumers, Tron/ERC-20 deposit pollers, and wallet sweep.
+  worker:
+    image: ${ECR_REGISTRY}/p2p-api:${IMAGE_TAG:-latest}
+    command: ["node", "dist/worker.main.js"]
+    env_file: .env.prod
+    restart: always
+    depends_on:
+      vault:
+        condition: service_started
+      redis:
+        condition: service_healthy
+    deploy:
+      resources:
+        limits:
+          memory: 1024M
+        reservations:
+          memory: 256M
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  web:
+    image: ${ECR_REGISTRY}/p2p-web:${IMAGE_TAG:-latest}
+    ports:
+      - "3000:3000"
+    environment:
+      # Do not use env_file here: avoid injecting api secrets into the Next container.
+      # Pass only what Next needs; use `docker compose --env-file .env.prod` so ${...} resolves.
+      - NEXT_PUBLIC_API_URL=${API_PUBLIC_URL:-https://api.p2p-processing-dev.com}
+      # Default on so a plain `docker compose -f docker-compose.prod.yml up` still works; set false in .env.prod to lock down.
+      - EXTERNAL_PLAYGROUND_ENABLED=${EXTERNAL_PLAYGROUND_ENABLED:-true}
+    restart: always
+    depends_on:
+      api:
+        condition: service_healthy
+    deploy:
+      resources:
+        limits:
+          memory: 512M
+        reservations:
+          memory: 256M
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  redis:
+    image: redis:7-alpine
+    # No --requirepass: app uses ioredis/Bull without AUTH; Redis is only reachable on the internal Docker network (not published to the host).
+    command: redis-server --maxmemory 256mb --maxmemory-policy allkeys-lru
+    volumes:
+      - redisdata:/data
+    restart: always
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    deploy:
+      resources:
+        limits:
+          memory: 512M
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  nginx:
+    image: nginx:alpine
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./certbot/conf:/etc/letsencrypt:ro
+      - ./certbot/www:/var/www/certbot:ro
+    depends_on:
+      - api
+      - web
+    restart: always
+
+  certbot:
+    image: certbot/certbot
+    volumes:
+      - ./certbot/conf:/etc/letsencrypt
+      - ./certbot/www:/var/www/certbot
+    entrypoint: "/bin/sh -c 'trap exit TERM; while :; do certbot renew; sleep 12h & wait $${!}; done;'"
+
+volumes:
+  redisdata:
+  vaultdata:
