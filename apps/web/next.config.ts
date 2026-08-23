@@ -10,8 +10,6 @@ const nextConfig: NextConfig = {
   eslint: {
     ignoreDuringBuilds: true,
   },
-  // Standalone output is required for Render deployment
-  output: 'standalone',
 };
 
 export default withNextIntl(nextConfig);

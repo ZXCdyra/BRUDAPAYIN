@@ -5,7 +5,7 @@ services:
     region: oregon
     plan: starter
     buildCommand: npm ci && npm run build:web
-    startCommand: cd apps/web && NODE_ENV=production PORT=10000 node .next/standalone/server.js
+    startCommand: cd apps/web && NODE_ENV=production PORT=10000 npx next start
     envVars:
       - key: NODE_ENV
         value: production
