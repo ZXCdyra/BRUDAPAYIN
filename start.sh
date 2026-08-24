@@ -19,9 +19,7 @@ if [ ! -f "apps/api/dist/main.js" ]; then
   ./node_modules/.bin/prisma generate --schema=packages/prisma/prisma/schema.prisma 2>&1
   
   echo "Building NestJS API..."
-  cd apps/api
-  ../../node_modules/.bin/nest build 2>&1
-  cd ../..
+  npm run build --workspace=apps/api 2>&1
   
   if [ ! -f "apps/api/dist/main.js" ]; then
     echo "NestJS API build FAILED. Exiting."
