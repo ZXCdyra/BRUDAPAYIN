@@ -17,28 +17,19 @@ export function formatCurrency(amount: number, currency = 'RUB'): string {
   }).format(amount) + ` ${currency}`;
 }
 
-/** Unix timestamp in **seconds** OR ISO date string. */
-export function formatDate(ts: number | string | Date | null | undefined): string {
-  if (!ts) return '';
-  const d = new Date(ts);
-  if (isNaN(d.getTime())) return '';
-  return format(d, DISPLAY_DATETIME_SEC);
+/** Unix timestamp in **seconds**. */
+export function formatDate(ts: number): string {
+  return format(new Date(ts * 1000), DISPLAY_DATETIME_SEC);
 }
 
-/** Unix timestamp in **seconds** OR ISO date string (same output as {@link formatDate}). */
-export function formatDateFull(ts: number | string | Date | null | undefined): string {
-  if (!ts) return '';
-  const d = new Date(ts);
-  if (isNaN(d.getTime())) return '';
-  return format(d, DISPLAY_DATETIME_SEC);
+/** Unix timestamp in **seconds** (same output as {@link formatDate}). */
+export function formatDateFull(ts: number): string {
+  return format(new Date(ts * 1000), DISPLAY_DATETIME_SEC);
 }
 
-/** `Date` instance, ISO string, or unix timestamp (e.g. API ISO string parsed with `new Date(...)`). */
-export function formatDateTime(date: Date | string | number | null | undefined): string {
-  if (!date) return '';
-  const d = new Date(date);
-  if (isNaN(d.getTime())) return '';
-  return format(d, DISPLAY_DATETIME_SEC);
+/** `Date` instance (e.g. API ISO string parsed with `new Date(...)`). */
+export function formatDateTime(date: Date): string {
+  return format(date, DISPLAY_DATETIME_SEC);
 }
 
 export function shortId(id: string): string {

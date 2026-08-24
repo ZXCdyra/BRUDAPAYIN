@@ -9,6 +9,7 @@ export const PAYIN_TRANSITIONS: Record<PayInOrderStatus, PayInOrderStatus[]> = {
     PayInOrderStatus.UNDERPAID,
     PayInOrderStatus.OVERPAID,
     PayInOrderStatus.CANCELED,
+    PayInOrderStatus.EXPIRED,
   ],
   [PayInOrderStatus.NEW]: [
     PayInOrderStatus.VERIFIED,
@@ -16,6 +17,7 @@ export const PAYIN_TRANSITIONS: Record<PayInOrderStatus, PayInOrderStatus[]> = {
     PayInOrderStatus.UNDERPAID,
     PayInOrderStatus.OVERPAID,
     PayInOrderStatus.CANCELED,
+    PayInOrderStatus.EXPIRED,
     PayInOrderStatus.APPEAL,
   ],
   [PayInOrderStatus.VERIFIED]: [
@@ -23,6 +25,7 @@ export const PAYIN_TRANSITIONS: Record<PayInOrderStatus, PayInOrderStatus[]> = {
     PayInOrderStatus.UNDERPAID,
     PayInOrderStatus.OVERPAID,
     PayInOrderStatus.CANCELED,
+    PayInOrderStatus.EXPIRED,
   ],
   [PayInOrderStatus.PAID]: [PayInOrderStatus.APPEAL],
   [PayInOrderStatus.UNDERPAID]: [PayInOrderStatus.APPEAL],
@@ -33,11 +36,17 @@ export const PAYIN_TRANSITIONS: Record<PayInOrderStatus, PayInOrderStatus[]> = {
     PayInOrderStatus.UNDERPAID,
     PayInOrderStatus.OVERPAID,
   ],
+  [PayInOrderStatus.EXPIRED]: [
+    PayInOrderStatus.PAID,
+    PayInOrderStatus.APPEAL,
+    PayInOrderStatus.CANCELED,
+  ],
   [PayInOrderStatus.APPEAL]: [
     PayInOrderStatus.PAID,
     PayInOrderStatus.UNDERPAID,
     PayInOrderStatus.OVERPAID,
     PayInOrderStatus.CANCELED,
+    PayInOrderStatus.EXPIRED,
   ],
   [PayInOrderStatus.UPLOAD_FAILED]: [],
   [PayInOrderStatus.NO_REQUISITE]: [PayInOrderStatus.CANCELED],

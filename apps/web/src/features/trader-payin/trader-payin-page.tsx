@@ -120,6 +120,7 @@ export function TraderPayInPage() {
       [PayInOrderStatus.OVERPAID]: t('statuses.OVERPAID'),
       [PayInOrderStatus.APPEAL]: t('statuses.APPEAL'),
       [PayInOrderStatus.CANCELED]: t('statuses.CANCELED'),
+      [PayInOrderStatus.EXPIRED]: t('statuses.EXPIRED'),
       [PayInOrderStatus.UPLOAD_FAILED]: t('statuses.UPLOAD_FAILED'),
       [PayInOrderStatus.NO_REQUISITE]: t('statuses.NO_REQUISITE'),
     }),
@@ -216,18 +217,6 @@ export function TraderPayInPage() {
     },
   });
 
-  const cancelMutation = useMutation({
-    mutationFn: (orderId: string) => api.post(internalPaths.traderPayinOrderCancel(orderId)),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: traderKeys.payinOrdersScope });
-      setSelectedOrder(null);
-      setFinalizeDialog(null);
-    },
-    onError: (e: unknown) => {
-      toast.error(formatErrorMessage(e));
-    },
-  });
-
   const resolveAppealMutation = useMutation({
     mutationFn: ({
       appealId,
@@ -256,10 +245,6 @@ export function TraderPayInPage() {
   function commitFinalize() {
     if (!finalizeDialog) return;
     const { order, kind, adjustmentInput } = finalizeDialog;
-    if (kind === 'cancel') {
-      cancelMutation.mutate(order.id);
-      return;
-    }
     if (kind === 'paid') {
       confirmMutation.mutate({ orderId: order.id });
       return;
@@ -566,7 +551,6 @@ export function TraderPayInPage() {
         setFinalizeDialog={setFinalizeDialog}
         onApply={() => commitFinalize()}
         confirmMutation={confirmMutation}
-        cancelMutation={cancelMutation}
       />
 
       <AppealDecisionConfirmDialog

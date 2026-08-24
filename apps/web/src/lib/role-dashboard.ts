@@ -1,15 +1,15 @@
 import { UserRole } from '@p2p/shared';
 
 const ROLE_DASHBOARD: Record<string, string> = {
-  [UserRole.TRADER]: '/ru/trader',
-  [UserRole.PAYOUT_TRADER]: '/ru/payout-trader',
-  [UserRole.ADMIN]: '/ru/admin',
-  [UserRole.SUPPORT]: '/ru/support',
-  [UserRole.MERCHANT]: '/ru/merchant',
-  [UserRole.OWNER]: '/ru/owner',
-  [UserRole.REFERRAL]: '/ru/referral',
+  [UserRole.TRADER]: '/trader',
+  [UserRole.PAYOUT_TRADER]: '/payout-trader',
+  [UserRole.ADMIN]: '/admin',
+  [UserRole.SUPPORT]: '/support',
+  [UserRole.MERCHANT]: '/merchant',
+  [UserRole.OWNER]: '/owner',
+  [UserRole.REFERRAL]: '/referral',
 };
 
 export function getDashboardPathForRole(role: string): string {
-  return ROLE_DASHBOARD[role] ?? '/ru/trader';
+  return ROLE_DASHBOARD[role] ?? '/trader';
 }

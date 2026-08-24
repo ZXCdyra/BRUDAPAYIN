@@ -18,7 +18,7 @@ export default function RootPage() {
     if (isAuthenticated && user) {
       router.replace(getDashboardPathForRole(user.role));
     } else {
-      router.replace('/ru/login');
+      router.replace('/login');
     }
   }, [isLoading, isAuthenticated, user, router]);
 

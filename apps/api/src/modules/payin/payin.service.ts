@@ -1361,6 +1361,19 @@ export class PayinService {
       this.applyPayinPaidTransitionTx(tx, { order, targetStatus, paidCredit }),
     );
 
+    // Released outcomes free the requisite operation/amount reservation (same as trader/merchant cancel).
+    const releasedStatuses: PayInOrderStatus[] = [
+      PayInOrderStatus.CANCELED,
+      PayInOrderStatus.EXPIRED,
+    ];
+    if (
+      !releasedStatuses.includes(from) &&
+      releasedStatuses.includes(targetStatus) &&
+      order.requisiteId
+    ) {
+      await this.requisitesService.releaseUsage(order.requisiteId, Number(order.amount));
+    }
+
     this.logger.log(`Admin updated pay-in order ${order.id}: ${from} -> ${targetStatus}`);
     this.emitPayinOrderRealtime({
       id: updated.id,
@@ -1467,52 +1480,67 @@ export class PayinService {
     return result;
   }
 
-  // ─── Internal (Trader): cancel ───
+  /**
+   * Auto-close Pay-In orders whose `autocloseAt` deadline passed without payment.
+   * Called periodically by PayinAutocloseService; mirrors cancel side effects
+   * (merchant webhook, requisite usage release, realtime) but sets EXPIRED with actor SYSTEM.
+   * APPEAL orders are never auto-closed — disputes follow their own resolution flow.
+   *
+   * @returns number of orders transitioned to EXPIRED.
+   */
+  async autocloseStalePayinOrders(now: Date = new Date()): Promise<number> {
+    const activeStatuses: PayInOrderStatus[] = [
+      PayInOrderStatus.PENDING,
+      PayInOrderStatus.NEW,
+      PayInOrderStatus.VERIFIED,
+    ];
 
-  async traderCancelOrder(traderId: string, orderId: string) {
-    const order = await this.prisma.payinOrder.findFirst({
-      where: { id: orderId, traderId },
-      include: ORDER_INCLUDE,
+    const stale = await this.prisma.payinOrder.findMany({
+      where: { status: { in: activeStatuses }, autocloseAt: { lt: now } },
+      select: { id: true, status: true, requisiteId: true, amount: true },
+      orderBy: { autocloseAt: 'asc' },
+      take: 100,
     });
-    if (!order) throw new NotFoundException('Order not found');
+    if (stale.length === 0) return 0;
 
-    if (!isValidPayInTransition(order.status as PayInOrderStatus, PayInOrderStatus.CANCELED)) {
-      throw new BadRequestException(
-        `Invalid status transition: ${order.status} -> CANCELED`,
-      );
-    }
+    let closed = 0;
+    for (const order of stale) {
+      const updated = await this.prisma.$transaction(async (tx) => {
+        const res = await tx.payinOrder.updateMany({
+          where: { id: order.id, status: { in: activeStatuses } },
+          data: {
+            status: 'EXPIRED',
+            ...payinCompletedAtForHistoryStatus(PayInOrderStatus.EXPIRED),
+          },
+        });
+        if (res.count === 0) return null;
+        const row = await tx.payinOrder.findUniqueOrThrow({
+          where: { id: order.id },
+          include: ORDER_INCLUDE,
+        });
+        await this.createPayinWebhookEntry(tx, row);
+        return row;
+      });
+      if (!updated) continue;
+      closed += 1;
 
-    const updated = await this.prisma.$transaction(async (tx) => {
-      const result = await tx.payinOrder.update({
-        where: { id: order.id },
-        data: {
-          status: 'CANCELED',
-          ...payinCompletedAtForHistoryStatus(PayInOrderStatus.CANCELED),
-        },
-        include: ORDER_INCLUDE,
+      if (order.requisiteId) {
+        await this.requisitesService.releaseUsage(order.requisiteId, Number(order.amount));
+      }
+
+      this.emitPayinOrderRealtime({
+        id: updated.id,
+        traderId: updated.traderId,
+        merchantId: updated.merchantId,
+        status: updated.status as PayInOrderStatus,
       });
 
-      await this.createPayinWebhookEntry(tx, result);
-
-      return result;
-    });
-
-    if (order.requisiteId) {
-      await this.requisitesService.releaseUsage(order.requisiteId, Number(order.amount));
+      void this.logPayinStatusChange(order.id, order.status, updated.status, {
+        actorRole: 'SYSTEM',
+      });
     }
 
-    this.emitPayinOrderRealtime({
-      id: updated.id,
-      traderId: updated.traderId,
-      merchantId: updated.merchantId,
-      status: updated.status as PayInOrderStatus,
-    });
-
-    void this.logPayinStatusChange(order.id, order.status, updated.status, {
-      actorRole: 'TRADER',
-    });
-
-    return payinOrderToOrderDto(updated);
+    return closed;
   }
 
   /**

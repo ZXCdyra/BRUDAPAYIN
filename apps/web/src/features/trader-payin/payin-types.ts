@@ -1,6 +1,6 @@
 import type { TraderPayInOrderDto } from '@p2p/shared';
 
-export type FinalizeKind = 'paid' | 'adjustment' | 'cancel';
+export type FinalizeKind = 'paid' | 'adjustment';
 
 export interface FinalizeDialogState {
   order: TraderPayInOrderDto;

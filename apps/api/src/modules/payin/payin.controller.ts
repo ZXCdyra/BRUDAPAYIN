@@ -215,16 +215,6 @@ export class PayinInternalController {
     return this.payinService.traderConfirmPaid(traderId, orderId, dto.actualAmount);
   }
 
-  @Post('orders/:orderId/cancel')
-  @Roles(UserRole.TRADER)
-  @ApiOperation({ summary: 'Trader cancels an order' })
-  async traderCancelOrder(
-    @CurrentUser('traderId') traderId: string,
-    @Param('orderId', ParseUUIDPipe) orderId: string,
-  ) {
-    return this.payinService.traderCancelOrder(traderId, orderId);
-  }
-
   @Post('orders/:orderId/fork-verification')
   @Roles(UserRole.TRADER)
   @ApiOperation({

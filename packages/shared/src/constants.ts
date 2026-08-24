@@ -28,12 +28,13 @@ export const PAYIN_TRADER_CURRENT_STATUSES: readonly PayInOrderStatus[] = [
   PayInOrderStatus.APPEAL,
 ];
 
-/** Pay-In orders that left the active workflow (paid variants, canceled, or upload failure). */
+/** Pay-In orders that left the active workflow (paid variants, canceled, expired, or upload failure). */
 export const PAYIN_TRADER_HISTORY_STATUSES: readonly PayInOrderStatus[] = [
   PayInOrderStatus.PAID,
   PayInOrderStatus.UNDERPAID,
   PayInOrderStatus.OVERPAID,
   PayInOrderStatus.CANCELED,
+  PayInOrderStatus.EXPIRED,
   PayInOrderStatus.UPLOAD_FAILED,
   PayInOrderStatus.NO_REQUISITE,
 ];

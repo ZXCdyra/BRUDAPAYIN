@@ -7,6 +7,8 @@ export enum PayInOrderStatus {
   OVERPAID = 'OVERPAID',
   APPEAL = 'APPEAL',
   CANCELED = 'CANCELED',
+  /** Expired without payment (autoclose timeout or manual admin decision). */
+  EXPIRED = 'EXPIRED',
   UPLOAD_FAILED = 'UPLOAD_FAILED',
   /** Cascade could not assign any active requisite for this amount/currency. */
   NO_REQUISITE = 'NO_REQUISITE',

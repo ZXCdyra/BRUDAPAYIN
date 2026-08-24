@@ -58,7 +58,12 @@ export function PaymentClient({ order }: PaymentClientProps) {
     ) {
       return 'success';
     }
-    if (order.status === PayInOrderStatus.CANCELED) return 'expired';
+    if (
+      order.status === PayInOrderStatus.CANCELED ||
+      order.status === PayInOrderStatus.EXPIRED
+    ) {
+      return 'expired';
+    }
     return 'viewing';
   });
 
@@ -79,7 +84,12 @@ export function PaymentClient({ order }: PaymentClientProps) {
       );
       setClockOffsetMs(off);
       setCurrentOrder(fresh);
-      if (fresh.status === PayInOrderStatus.CANCELED) setStep('expired');
+      if (
+        fresh.status === PayInOrderStatus.CANCELED ||
+        fresh.status === PayInOrderStatus.EXPIRED
+      ) {
+        setStep('expired');
+      }
       if (
         fresh.status === PayInOrderStatus.VERIFIED ||
         isTraderPaymentRecordedStatus(fresh.status)

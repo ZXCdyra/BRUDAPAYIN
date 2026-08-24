@@ -20,7 +20,6 @@ export function PayInFinalizeConfirmationModal({
   setFinalizeDialog,
   onApply,
   confirmMutation,
-  cancelMutation,
 }: {
   finalizeDialog: FinalizeDialogState | null;
   onClose: () => void;
@@ -31,7 +30,6 @@ export function PayInFinalizeConfirmationModal({
     unknown,
     { orderId: string; actualAmount?: number }
   >;
-  cancelMutation: UseMutationResult<unknown, unknown, string>;
 }) {
   return (
     <Modal open={finalizeDialog !== null} onClose={onClose} title="Are you sure?" size="sm">
@@ -83,8 +81,7 @@ export function PayInFinalizeConfirmationModal({
 
             const statusWords = finalizeTargetPreview(fd.order, fd.kind, statusPreviewArg);
             const applyLoading =
-              (confirmMutation.isPending && confirmMutation.variables?.orderId === fd.order.id) ||
-              (cancelMutation.isPending && cancelMutation.variables === fd.order.id);
+              confirmMutation.isPending && confirmMutation.variables?.orderId === fd.order.id;
             const applyDisabled =
               fd.kind === 'adjustment' &&
               (adjParsed === null || adjParsed === Number(fd.order.amount));

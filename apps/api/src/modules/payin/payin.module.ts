@@ -1,5 +1,6 @@
 import { Module } from '@nestjs/common';
 import { PayinService } from './payin.service';
+import { PayinAutocloseService } from './payin-autoclose.service';
 import { PayinRealtimeService } from './payin-realtime.service';
 import { PayinController, PayinInternalController } from './payin.controller';
 import { PaymentPageController } from './payment-page.controller';
@@ -30,7 +31,7 @@ import { TraderRatesService } from '../traders/trader-rates.service';
     PayinProviderModule,
   ],
   controllers: [PayinController, PayinInternalController, PaymentPageController, PayinProviderWebhookController],
-  providers: [PayinService, PayinRealtimeService, TraderRatesService],
+  providers: [PayinService, PayinAutocloseService, PayinRealtimeService, TraderRatesService],
   exports: [PayinService, PayinRealtimeService],
 })
 export class PayinModule {}

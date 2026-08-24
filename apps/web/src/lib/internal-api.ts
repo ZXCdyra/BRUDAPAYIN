@@ -84,7 +84,6 @@ export const internalPaths = {
   traderPayinOrderStatusHistory: (orderId: string) =>
     `/api/trader/payin/orders/${orderId}/status-history`,
   traderPayinOrderConfirm: (orderId: string) => `/api/trader/payin/orders/${orderId}/confirm`,
-  traderPayinOrderCancel: (orderId: string) => `/api/trader/payin/orders/${orderId}/cancel`,
   traderPayinForkVerification: (orderId: string) =>
     `/api/trader/payin/orders/${orderId}/fork-verification`,
 

@@ -957,7 +957,6 @@ export function StaffUserAccountsPanel({ queryKeyPrefix }: StaffUserAccountsPane
         title="Create User"
       >
         <form
-          key={`create-user-form-${form.role}`}
           className="space-y-4"
           onSubmit={(e) => {
             e.preventDefault();
@@ -986,7 +985,7 @@ export function StaffUserAccountsPanel({ queryKeyPrefix }: StaffUserAccountsPane
             type="text"
             value={form.login}
             onChange={(e) => setForm({ ...form, login: e.target.value })}
-            placeholder="Например, merchant"
+            placeholder=""
             autoComplete="username"
             error={createFieldErrors.login}
           />

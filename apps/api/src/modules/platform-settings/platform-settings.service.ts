@@ -27,7 +27,7 @@ export const PLATFORM_SETTING_PAYIN_AUTOCLOSE_MINUTES_FORK =
   'payin_autoclose_minutes_fork' as const satisfies PlatformSettingKey;
 
 const DEFAULTS: Record<PlatformSettingKey, string> = {
-  payin_autoclose_minutes: '5',
+  payin_autoclose_minutes: '10',
   payin_autoclose_minutes_fork: '10',
   default_payin_commission_percent: '0',
   default_payout_commission_percent: '0',

@@ -196,6 +196,7 @@ export function PayInOrderStatusColumnCell({
       [PayInOrderStatus.OVERPAID]: t('statuses.OVERPAID'),
       [PayInOrderStatus.APPEAL]: t('statuses.APPEAL'),
       [PayInOrderStatus.CANCELED]: t('statuses.CANCELED'),
+      [PayInOrderStatus.EXPIRED]: t('statuses.EXPIRED'),
       [PayInOrderStatus.UPLOAD_FAILED]: t('statuses.UPLOAD_FAILED'),
       [PayInOrderStatus.NO_REQUISITE]: t('statuses.NO_REQUISITE'),
     }),

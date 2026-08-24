@@ -208,7 +208,6 @@ export function usePayinTraderRealtime(queryClient: QueryClient): void {
   const invalidateAll = () => {
     invalidateDebouncer.current.schedule(() => {
       queryClient.invalidateQueries({ queryKey: traderKeys.payinOrdersScope });
-      queryClient.invalidateQueries({ queryKey: traderKeys.appealsScope });
       queryClient.invalidateQueries({ queryKey: traderKeys.balancesMe() });
       queryClient.invalidateQueries({ queryKey: traderKeys.usdtWallet() });
       queryClient.invalidateQueries({ queryKey: traderKeys.dashboardStats() });

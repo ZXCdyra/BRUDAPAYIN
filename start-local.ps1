@@ -52,5 +52,6 @@ Write-Host "  API:      http://localhost:3001" -ForegroundColor Cyan
 Write-Host "  Swagger:  http://localhost:3001/api/docs" -ForegroundColor Cyan
 Write-Host "  MinIO:    http://localhost:9001  (minioadmin/minioadmin)" -ForegroundColor Cyan
 Write-Host ""
-Write-Host "  Owner login:  owner@p2p.local / admin123" -ForegroundColor Yellow
+Write-Host "  Logins:   owner / admin / support / trader / merchant / referral / payout" -ForegroundColor Yellow
+Write-Host "  Password: admin123" -ForegroundColor Yellow
 Write-Host ""

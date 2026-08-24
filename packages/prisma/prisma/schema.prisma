@@ -787,6 +787,8 @@ enum PayinStatus {
   OVERPAID
   APPEAL
   CANCELED
+  /// Expired without payment (autoclose timeout or manual admin decision).
+  EXPIRED
   UPLOAD_FAILED
   /// No trader requisite could accept this Pay-In (see cascade routing).
   NO_REQUISITE

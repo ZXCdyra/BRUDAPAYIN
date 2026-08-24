@@ -14,6 +14,7 @@ export const payinStatusVariant: Record<string, BadgeVariant> = {
   APPEAL: 'warning',
   UNDERPAID: 'warning',
   OVERPAID: 'warning',
+  EXPIRED: 'muted',
   UPLOAD_FAILED: 'danger',
   NO_REQUISITE: 'danger',
 };

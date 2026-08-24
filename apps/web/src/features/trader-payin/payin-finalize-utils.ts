@@ -24,13 +24,10 @@ export function finalizeTargetPreview(
 ): string {
   const orderAmt = Number(order.amount);
   if (kind === 'paid') return 'Paid';
-  if (kind === 'adjustment') {
-    if (actual === undefined) return 'Adjusted (enter amount)';
-    if (actual === orderAmt) return 'Paid';
-    if (actual < orderAmt) return 'Underpaid';
-    return 'Overpaid';
-  }
-  return 'Canceled';
+  if (actual === undefined) return 'Adjusted (enter amount)';
+  if (actual === orderAmt) return 'Paid';
+  if (actual < orderAmt) return 'Underpaid';
+  return 'Overpaid';
 }
 
 /** Accent for the preview line describing the upcoming status label */
@@ -40,7 +37,6 @@ export function finalizePreviewTone(
   adjustmentInput: string,
 ): string {
   if (kind === 'paid') return 'text-accent-green';
-  if (kind === 'cancel') return 'text-accent-red';
   const actual = parsePositiveAmount(adjustmentInput);
   if (actual === null) return 'text-text-secondary';
   const o = Number(order.amount);
@@ -50,17 +46,13 @@ export function finalizePreviewTone(
 }
 
 export function finalizeOptionsForOrder(order: Pick<TraderPayInOrderDto, 'status'>): FinalizeKind[] {
-  const isTerminal = 
-    order.status === PayInOrderStatus.PAID ||
-    order.status === PayInOrderStatus.UNDERPAID ||
-    order.status === PayInOrderStatus.OVERPAID ||
-    order.status === PayInOrderStatus.CANCELED;
-  
-  if (isTerminal) {
-    return [];
+  if (
+    order.status === PayInOrderStatus.NEW ||
+    order.status === PayInOrderStatus.VERIFIED ||
+    order.status === PayInOrderStatus.CANCELED
+  ) {
+    return ['paid', 'adjustment'];
   }
-  
-  // Traders cannot change order status — only merchants and admins can.
   return [];
 }
 

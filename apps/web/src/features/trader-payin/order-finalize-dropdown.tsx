@@ -106,10 +106,7 @@ export function OrderFinalizeMenuPortal({
     return () => window.removeEventListener('keydown', onKey);
   }, [open, setMenuState]);
 
-  const optionClasses: Record<
-    Exclude<FinalizeKind, 'cancel'>,
-    string
-  > = {
+  const optionClasses: Record<FinalizeKind, string> = {
     paid: 'border-accent-green text-accent-green hover:bg-accent-green/10',
     adjustment: 'border-accent-purple text-accent-purple hover:bg-accent-purple/10',
   };
@@ -165,19 +162,6 @@ export function OrderFinalizeMenuPortal({
           }}
         >
           {t('adjustment')}
-        </button>
-      )}
-      {opts.includes('cancel') && (
-        <button
-          type="button"
-          role="menuitem"
-          className="rounded-md border border-accent-red px-3 py-2 text-left text-xs font-medium text-accent-red transition-colors hover:bg-accent-red/10"
-          onClick={() => {
-            setMenuState(null);
-            onPickKind('cancel');
-          }}
-        >
-          {t('canceled')}
         </button>
       )}
     </div>

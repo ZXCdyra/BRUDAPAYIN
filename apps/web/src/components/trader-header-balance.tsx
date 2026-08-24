@@ -48,7 +48,7 @@ export function TraderHeaderBalance() {
   return (
     <Tooltip content={tooltip} side="bottom" wide>
       <Link
-        href="/ru/trader/balance"
+        href="/trader/balance"
         className={clsx(
           'inline-flex max-w-[min(100%,20rem)] shrink-0 items-center gap-2 rounded-lg px-2.5 py-1.5 text-xs transition-colors sm:max-w-none sm:px-3 sm:text-sm',
           'bg-accent-muted/80 ring-1 ring-accent/20 hover:bg-accent-muted dark:bg-accent/15 dark:ring-accent/30',

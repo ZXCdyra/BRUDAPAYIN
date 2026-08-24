@@ -2,10 +2,12 @@
 
 import { useEffect, useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { ArrowDownCircle, FileUp, Loader2 } from 'lucide-react';
+import { ArrowDownCircle, FileUp, Loader2, Copy, Check } from 'lucide-react';
 import { api } from '@/lib/api';
 import { internalPaths } from '@/lib/internal-api';
 import { topupKeys } from '@/lib/query-keys';
+import { PLATFORM_USDT_TRC20_WALLET } from '@/lib/platform';
+import { useCopyToClipboard } from '@/lib/hooks/use-copy-to-clipboard';
 import { Badge } from '@/components/ui/badge';
 import { DataTable } from '@/components/ui/data-table';
 import { PaginationControls } from '@/components/ui/pagination-controls';
@@ -34,6 +36,7 @@ const STATUS_BADGE: Record<string, 'green' | 'yellow' | 'red' | 'blue'> = {
 
 export default function TopUpPage() {
   const queryClient = useQueryClient();
+  const { copied, copy: copyToClipboard } = useCopyToClipboard();
 
   const tr = {
     title: 'Пополнение баланса',
@@ -45,7 +48,7 @@ export default function TopUpPage() {
     amountUsdt: 'Сумма USDT',
     commentOptional: 'Комментарий (необязательно)',
     submitting: 'Отправка…',
-    submitRequest: 'Отправить заявку',
+    submitRequest: 'Я пополнил',
     myRequests: 'Мои заявки',
     requestsSub: 'Список ваших заявок на пополнение баланса USDT (только TRC-20)',
     emptyRequests: 'Заявок пока нет',
@@ -114,6 +117,33 @@ export default function TopUpPage() {
         </h1>
         <p className="mt-1 text-sm text-text-muted">{tr.subtitle}</p>
       </div>
+
+      {/* Platform wallet */}
+      <section className="rounded-xl border border-border-subtle bg-bg-secondary p-4">
+        <p className="text-xs font-medium uppercase tracking-wide text-text-muted">
+          Кошелёк платформы · USDT TRC-20 (Tron)
+        </p>
+        <div className="mt-2 flex items-center gap-2">
+          <code className="flex-1 break-all font-mono text-sm text-accent">
+            {PLATFORM_USDT_TRC20_WALLET}
+          </code>
+          <button
+            type="button"
+            onClick={() => copyToClipboard(PLATFORM_USDT_TRC20_WALLET, 'wallet')}
+            className="shrink-0 rounded-md p-2 text-text-muted transition-colors hover:bg-bg-hover hover:text-text-primary"
+            aria-label="Скопировать адрес кошелька"
+          >
+            {copied === 'wallet' ? (
+              <Check size={16} className="text-accent-green" />
+            ) : (
+              <Copy size={16} />
+            )}
+          </button>
+        </div>
+        <p className="mt-2 text-xs text-red-400/80">
+          Отправляйте только USDT в сети TRC-20. Переводы в других сетях будут утеряны.
+        </p>
+      </section>
 
       {/* Create form */}
       <section className="rounded-xl border border-border-subtle bg-bg-secondary p-4 space-y-4">

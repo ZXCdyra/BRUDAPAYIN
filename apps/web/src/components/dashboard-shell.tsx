@@ -347,7 +347,7 @@ export function DashboardShell({ children, navItems, role }: DashboardShellProps
             className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-sm text-text-muted transition-colors hover:bg-surface-tertiary hover:text-danger"
           >
             <LogOut className="h-4 w-4" />
-            {role === 'trader' ? tShell('signOut') : 'Sign out'}
+            {role === 'trader' ? tShell('signOut') : 'Выйти'}
           </button>
         </div>
       </aside>

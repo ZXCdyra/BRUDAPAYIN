@@ -31,12 +31,14 @@ describe('requisite volume breakdown status sets', () => {
     expect(PAYIN_REQUISITE_NONCOMPLETED_STATUSES).toContain(PayInOrderStatus.NO_REQUISITE);
     expect(PAYIN_REQUISITE_NONCOMPLETED_STATUSES).toContain(PayInOrderStatus.NEW);
     expect(PAYIN_REQUISITE_NONCOMPLETED_STATUSES).not.toContain(PayInOrderStatus.CANCELED);
+    expect(PAYIN_REQUISITE_NONCOMPLETED_STATUSES).not.toContain(PayInOrderStatus.EXPIRED);
     expect(PAYIN_REQUISITE_NONCOMPLETED_STATUSES).not.toContain(PayInOrderStatus.PAID);
 
     const all = Object.values(PayInOrderStatus) as PayInOrderStatus[];
     const covered = new Set([
       ...PAYIN_REQUISITE_COMPLETED_STATUSES,
       PayInOrderStatus.CANCELED,
+      PayInOrderStatus.EXPIRED,
       ...PAYIN_REQUISITE_NONCOMPLETED_STATUSES,
     ]);
     expect(all.every((s) => covered.has(s))).toBe(true);

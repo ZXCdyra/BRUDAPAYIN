@@ -54,6 +54,7 @@ export const PAYIN_REQUISITE_NONCOMPLETED_STATUSES: readonly PayInOrderStatus[] 
 ).filter(
   (s) =>
     s !== PayInOrderStatus.CANCELED &&
+    s !== PayInOrderStatus.EXPIRED &&
     !(PAYIN_REQUISITE_COMPLETED_STATUSES as readonly PayInOrderStatus[]).includes(s),
 );
 
