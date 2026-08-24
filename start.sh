@@ -6,7 +6,7 @@ export API_ORIGIN="${API_ORIGIN:-http://localhost:3001}"
 echo "Starting BrudaPay platform..."
 
 echo "Running Prisma migrations..."
-npx prisma migrate deploy --schema=packages/prisma/prisma/schema.prisma 2>&1 || true
+./node_modules/.bin/prisma migrate deploy --schema=packages/prisma/prisma/schema.prisma 2>&1 || true
 
 echo "Database ready."
 
@@ -16,11 +16,11 @@ if [ ! -f "apps/api/dist/main.js" ]; then
   
   npm run build --workspace=@p2p/config 2>&1
   npm run build --workspace=@p2p/shared 2>&1
-  npx prisma generate --schema=packages/prisma/prisma/schema.prisma 2>&1
+  ./node_modules/.bin/prisma generate --schema=packages/prisma/prisma/schema.prisma 2>&1
   
   echo "Building NestJS API..."
   cd apps/api
-   ../../node_modules/.bin/nest build 2>&1
+  ../../node_modules/.bin/nest build 2>&1
   cd ../..
   
   if [ ! -f "apps/api/dist/main.js" ]; then
