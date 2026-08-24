@@ -1,6 +1,8 @@
 #!/bin/sh
 set -e
 
+export API_ORIGIN="${API_ORIGIN:-http://localhost:3001}"
+
 echo "Starting BrudaPay platform..."
 
 echo "Running Prisma migrations..."
@@ -19,7 +21,7 @@ fi
 echo "Database ready."
 
 # Build NestJS API if missing
-if [ ! -f "api/dist/main.js" ]; then
+if [ ! -f "apps/api/dist/main.js" ]; then
   echo "NestJS API not built, installing deps and building..."
   
   if [ ! -d "node_modules" ]; then
@@ -29,9 +31,9 @@ if [ ! -f "api/dist/main.js" ]; then
   
   echo "Building NestJS API..."
   npm run build --workspace=@p2p/config --workspace=@p2p/shared --workspace=@p2p/prisma 2>&1
-  npm run build --workspace=apps/api 2>&1
+  npx --workspace=@p2p/api nest build 2>&1
   
-  if [ ! -f "api/dist/main.js" ]; then
+  if [ ! -f "apps/api/dist/main.js" ]; then
     echo "NestJS API build FAILED. Exiting."
     exit 1
   fi
@@ -42,7 +44,7 @@ fi
 
 # Start NestJS API on port 3001
 echo "Starting NestJS API (port 3001)..."
-node api/dist/main.js &
+node apps/api/dist/main.js &
 API_PID=$!
 
 echo "Waiting for API to start..."
@@ -55,6 +57,6 @@ else
   exit 1
 fi
 
-# Start Next.js on port 3000
-echo "Starting Next.js (port 3000)..."
+# Start Next.js on PORT
+echo "Starting Next.js (standalone server on port $PORT)..."
 exec node server.js

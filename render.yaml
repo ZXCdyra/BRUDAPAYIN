@@ -1,3 +1,27 @@
-buildCommand: npm install --legacy-peer-deps && npm run build:web
-startCommand: cd apps/web && ../node_modules/.bin/next start -p $PORT
-regions: [oregon]
+services:
+  - type: web
+    name: brudapay-web
+    env: docker
+    region: oregon
+    plan: standard
+    dockerfilePath: Dockerfile
+    healthCheckPath: /
+    disk:
+      name: p2p-data
+      mountPath: /tmp
+      sizeGB: 10
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: NEXT_TELEMETRY_DISABLED
+        value: "1"
+      - key: NEXT_RUNTIME
+        value: nodejs
+      - key: API_ORIGIN
+        value: "http://localhost:3001"
+      - key: DATABASE_URL
+        sync: false
+        description: "Neon PostgreSQL connection string"
+      - key: JWT_SECRET
+        sync: false
+        description: "JWT secret for authentication"
