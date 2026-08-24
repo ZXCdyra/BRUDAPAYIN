@@ -10,6 +10,7 @@ services:
       name: p2p-data
       mountPath: /tmp
       sizeGB: 10
+    buildTimeoutInSeconds: 1800
     envVars:
       - key: NODE_ENV
         value: production

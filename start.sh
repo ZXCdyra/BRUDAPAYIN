@@ -6,41 +6,9 @@ export API_ORIGIN="${API_ORIGIN:-http://localhost:3001}"
 echo "Starting BrudaPay platform..."
 
 echo "Running Prisma migrations..."
-PRISMA_MIGRATE_OUTPUT=$(npx prisma migrate deploy --schema=packages/prisma/prisma/schema.prisma 2>&1) || true
-
-if echo "$PRISMA_MIGRATE_OUTPUT" | grep -q "not empty"; then
-  echo "Database already has data, baselining..."
-  for migration in $(find packages/prisma/prisma/migrations -mindepth 1 -maxdepth 1 -type d -exec basename {} \; 2>/dev/null); do
-    if [ "$migration" != "README.md" ]; then
-      npx prisma migrate resolve --applied "$migration" --schema=packages/prisma/prisma/schema.prisma 2>&1 || true
-    fi
-  done
-  npx prisma migrate deploy --schema=packages/prisma/prisma/schema.prisma 2>&1 || true
-fi
+npx prisma migrate deploy --schema=packages/prisma/prisma/schema.prisma 2>&1 || true
 
 echo "Database ready."
-
-# Build NestJS API if missing
-if [ ! -f "apps/api/dist/main.js" ]; then
-  echo "NestJS API not built, installing deps and building..."
-  
-  if [ ! -d "node_modules" ]; then
-    echo "Installing dependencies..."
-    npm ci 2>&1 || npm install 2>&1
-  fi
-  
-  echo "Building NestJS API..."
-  npm run build --workspace=@p2p/config --workspace=@p2p/shared --workspace=@p2p/prisma 2>&1
-  npx --workspace=@p2p/api nest build 2>&1
-  
-  if [ ! -f "apps/api/dist/main.js" ]; then
-    echo "NestJS API build FAILED. Exiting."
-    exit 1
-  fi
-  echo "NestJS API built successfully"
-else
-  echo "NestJS API already built"
-fi
 
 # Start NestJS API on port 3001
 echo "Starting NestJS API (port 3001)..."
