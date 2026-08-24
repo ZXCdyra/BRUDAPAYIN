@@ -1,7 +1,6 @@
 {
   "extends": "./tsconfig.json",
   "compilerOptions": {
-    "baseUrl": "./",
     "paths": {
       "@p2p/shared": ["../../packages/shared/dist"],
       "@p2p/config": ["../../packages/config/dist"]
