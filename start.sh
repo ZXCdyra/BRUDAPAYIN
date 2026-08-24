@@ -1,55 +1,60 @@
 #!/bin/sh
 set -e
 
-echo "🚀 Starting BrudaPay platform..."
+echo "Starting BrudaPay platform..."
 
-# ─── Prisma Migrations ───
-echo "📦 Running Prisma migrations..."
+echo "Running Prisma migrations..."
 PRISMA_MIGRATE_OUTPUT=$(npx prisma migrate deploy --schema=packages/prisma/prisma/schema.prisma 2>&1) || true
 
 if echo "$PRISMA_MIGRATE_OUTPUT" | grep -q "not empty"; then
-  echo "⚠️  Database already has data, baselining..."
-  # Mark each migration folder as applied individually
+  echo "Database already has data, baselining..."
   for migration in $(find packages/prisma/prisma/migrations -mindepth 1 -maxdepth 1 -type d -exec basename {} \; 2>/dev/null); do
     if [ "$migration" != "README.md" ]; then
       npx prisma migrate resolve --applied "$migration" --schema=packages/prisma/prisma/schema.prisma 2>&1 || true
     fi
   done
-  # Try deploy again
   npx prisma migrate deploy --schema=packages/prisma/prisma/schema.prisma 2>&1 || true
 fi
 
-echo "✅ Database ready."
+echo "Database ready."
 
-# ─── Verify NestJS API build exists ───
+# Build NestJS API if missing
 if [ ! -f "api/dist/main.js" ]; then
-  echo "❌ NestJS API not built! Attempting build..."
-  npm run build --workspace=@p2p/config --workspace=@p2p/shared --workspace=@p2p/prisma 2>&1 || true
-  npm run build --workspace=apps/api 2>&1 || true
+  echo "NestJS API not built, installing deps and building..."
+  
+  if [ ! -d "node_modules" ]; then
+    echo "Installing dependencies..."
+    npm ci 2>&1 || npm install 2>&1
+  fi
+  
+  echo "Building NestJS API..."
+  npm run build --workspace=@p2p/config --workspace=@p2p/shared --workspace=@p2p/prisma 2>&1
+  npm run build --workspace=apps/api 2>&1
   
   if [ ! -f "api/dist/main.js" ]; then
-    echo "❌ NestJS API build failed. Continuing with Next.js only."
+    echo "NestJS API build FAILED. Exiting."
+    exit 1
   fi
-fi
-
-# ─── Start NestJS API ───
-if [ -f "api/dist/main.js" ]; then
-  echo "🔌 Starting NestJS API (port 3001)..."
-  node api/dist/main.js &
-  API_PID=$!
-  
-  echo "⏳ Waiting for API to start..."
-  sleep 5
-  
-  if kill -0 $API_PID 2>/dev/null; then
-    echo "✅ NestJS API running (PID: $API_PID)"
-  else
-    echo "⚠️  NestJS API exited, proceeding with Next.js only."
-  fi
+  echo "NestJS API built successfully"
 else
-  echo "⚠️  Skipping NestJS API (not built). Next.js will use demo routes."
+  echo "NestJS API already built"
 fi
 
-# ─── Start Next.js ───
-echo "🌐 Starting Next.js (port 3000)..."
+# Start NestJS API on port 3001
+echo "Starting NestJS API (port 3001)..."
+node api/dist/main.js &
+API_PID=$!
+
+echo "Waiting for API to start..."
+sleep 5
+
+if kill -0 $API_PID 2>/dev/null; then
+  echo "NestJS API running (PID: $API_PID)"
+else
+  echo "NestJS API failed to start"
+  exit 1
+fi
+
+# Start Next.js on port 3000
+echo "Starting Next.js (port 3000)..."
 exec node server.js
