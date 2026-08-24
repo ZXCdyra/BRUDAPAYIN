@@ -1,0 +1,10 @@
+'use client';
+
+import { useEffect } from 'react';
+import { useRouter } from 'next/navigation';
+
+export default function ReferralRedirect() {
+  const router = useRouter();
+  useEffect(() => { router.replace('/ru/referral'); }, [router]);
+  return null;
+}
