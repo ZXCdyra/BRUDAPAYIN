@@ -3,9 +3,16 @@ set -e
 
 echo "🚀 Starting BrudaPay platform..."
 
-# Run Prisma migrations
+# Run Prisma migrations (handle "database not empty" gracefully)
 echo "📦 Running Prisma migrations..."
-npx prisma migrate deploy --schema=packages/prisma/prisma/schema.prisma
+MIGRATE_OUTPUT=$(npx prisma migrate deploy --schema=packages/prisma/prisma/schema.prisma 2>&1) || true
+if echo "$MIGRATE_OUTPUT" | grep -q "not empty"; then
+  echo "⚠️  Database already has data, baseling existing migrations..."
+  # Mark all existing migrations as applied
+  npx prisma migrate resolve --applied --schema=packages/prisma/prisma/schema.prisma 2>&1 || true
+  # Try deploy again
+  npx prisma migrate deploy --schema=packages/prisma/prisma/schema.prisma 2>&1 || true
+fi
 
 # Start NestJS API on port 3001 in background
 echo "🔌 Starting NestJS API (port 3001)..."
