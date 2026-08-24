@@ -18,9 +18,9 @@ if [ ! -f "apps/api/dist/main.js" ]; then
   npm run build --workspace=@p2p/shared 2>&1
   npx prisma generate --schema=packages/prisma/prisma/schema.prisma 2>&1
   
-  echo "Building NestJS API with nest-cli..."
+  echo "Building NestJS API..."
   cd apps/api
-  npx nest build 2>&1
+  ../../../node_modules/.bin/nest build 2>&1
   cd ../..
   
   if [ ! -f "apps/api/dist/main.js" ]; then
