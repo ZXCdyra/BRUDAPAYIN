@@ -6,6 +6,7 @@ WORKDIR /app
 FROM base AS deps
 COPY package*.json ./
 COPY apps/web/package.json ./apps/web/
+COPY apps/api/package.json ./apps/api/
 COPY packages/shared/package.json ./packages/shared/
 COPY packages/prisma/package.json ./packages/prisma/
 COPY packages/config/package.json ./packages/config/
@@ -21,6 +22,8 @@ FROM base AS builder
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
 RUN npx prisma generate --schema=packages/prisma/prisma/schema.prisma
+RUN npm run build --workspace=@p2p/config --workspace=@p2p/shared --workspace=@p2p/prisma
+RUN npm run build --workspace=apps/api
 RUN npm run build:web
 
 # ─── RUNNER ───
@@ -34,6 +37,9 @@ COPY --from=builder /app/apps/web/.next/standalone ./
 COPY --from=builder /app/apps/web/public ./apps/web/public
 COPY --from=builder /app/apps/web/.next/static ./apps/web/.next/static
 
+# Copy NestJS API
+COPY --from=builder /app/apps/api/dist ./api
+
 # Copy Prisma schema and client
 COPY --from=builder /app/packages/prisma/prisma ./prisma
 COPY --from=builder /app/packages/prisma/dist ./packages/prisma/dist
@@ -45,5 +51,5 @@ RUN npm install --omit=dev @prisma/client
 EXPOSE 3000
 ENV PORT=3000
 
-# Run Prisma migrations and seed before starting
-CMD sh -c "npx prisma migrate deploy --schema=packages/prisma/prisma/schema.prisma && npx ts-node packages/prisma/prisma/initial-seed.ts && node server.js"
+# Start Next.js, then NestJS API in background
+CMD sh -c "npx prisma migrate deploy --schema=packages/prisma/prisma/schema.prisma && node server.js & sleep 2 && node api/dist/main.js"
