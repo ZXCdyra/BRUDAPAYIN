@@ -20,7 +20,7 @@ if [ ! -f "apps/api/dist/main.js" ]; then
   
   echo "Building NestJS API..."
   cd apps/api
-  ../../../node_modules/.bin/nest build 2>&1
+   ../../node_modules/.bin/nest build 2>&1
   cd ../..
   
   if [ ! -f "apps/api/dist/main.js" ]; then
