@@ -10,6 +10,28 @@ npx prisma migrate deploy --schema=packages/prisma/prisma/schema.prisma 2>&1 || 
 
 echo "Database ready."
 
+# Build NestJS API if missing
+if [ ! -f "apps/api/dist/main.js" ]; then
+  echo "NestJS API not built, building dependencies..."
+  
+  npm run build --workspace=@p2p/config 2>&1
+  npm run build --workspace=@p2p/shared 2>&1
+  npx prisma generate --schema=packages/prisma/prisma/schema.prisma 2>&1
+  
+  echo "Building NestJS API with nest-cli..."
+  cd apps/api
+  npx nest build 2>&1
+  cd ../..
+  
+  if [ ! -f "apps/api/dist/main.js" ]; then
+    echo "NestJS API build FAILED. Exiting."
+    exit 1
+  fi
+  echo "NestJS API built successfully"
+else
+  echo "NestJS API already built"
+fi
+
 # Start NestJS API on port 3001
 echo "Starting NestJS API (port 3001)..."
 node apps/api/dist/main.js &

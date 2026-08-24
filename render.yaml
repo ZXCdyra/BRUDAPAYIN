@@ -1,10 +1,11 @@
 services:
   - type: web
     name: brudapay-web
-    env: docker
+    env: node
     region: oregon
     plan: standard
-    dockerfilePath: Dockerfile
+    buildCommand: npm install --legacy-peer-deps && npm run build:config && npm run build --workspace=@p2p/shared && npx prisma generate --schema=packages/prisma/prisma/schema.prisma && cd apps/api && npx nest build && cd ../web && npm run build:web
+    startCommand: ./start.sh
     healthCheckPath: /
     disk:
       name: p2p-data
