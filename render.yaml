@@ -1,21 +1,23 @@
 services:
   - type: web
-    name: p2p-web
-    env: node
+    name: brudapay-web
+    env: docker
     region: oregon
-    plan: starter
-    buildCommand: npm ci && npm run build:web
-    startCommand: cd apps/web && NODE_ENV=production PORT=10000 npx next start
+    plan: standard
+    dockerfilePath: Dockerfile
+    dockerContext: .
+    healthCheckPath: /
     envVars:
       - key: NODE_ENV
         value: production
       - key: NEXT_TELEMETRY_DISABLED
         value: "1"
+      - key: DATABASE_URL
+        sync: false
+        description: "Neon PostgreSQL connection string"
+      - key: JWT_SECRET
+        sync: false
+        description: "JWT secret for authentication (generate with openssl rand -hex 64)"
       - key: NEXT_PUBLIC_API_URL
-        sync: false
-        description: "URL вашего API (будет позже, пока можно оставить пустым или http://localhost:3001)"
-      - key: NEXT_PUBLIC_TELEGRAM_BOT_USERNAME
-        sync: false
-        description: "Telegram bot username без @"
-      - key: EXTERNAL_PLAYGROUND_ENABLED
-        value: "true"
+        value: ""
+        description: "Base URL for API calls"
