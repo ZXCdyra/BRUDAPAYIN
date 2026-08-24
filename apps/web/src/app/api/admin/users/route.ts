@@ -17,3 +17,42 @@ export async function GET(request: NextRequest) {
     limit,
   });
 }
+
+export async function POST(request: NextRequest) {
+  try {
+    const body = await request.json();
+    const { login, password, role, email } = body;
+
+    if (!login || !password || !role) {
+      return NextResponse.json(
+        { code: 'VALIDATION_ERROR', message: 'login, password, and role are required' },
+        { status: 400 }
+      );
+    }
+
+    const validRoles = ['TRADER', 'MERCHANT', 'ADMIN', 'SUPPORT', 'PAYOUT_TRADER', 'OWNER', 'REFERRAL'];
+    if (!validRoles.includes(role)) {
+      return NextResponse.json(
+        { code: 'INVALID_ROLE', message: `Invalid role. Must be one of: ${validRoles.join(', ')}` },
+        { status: 400 }
+      );
+    }
+
+    // Simulate user creation
+    const newUser = {
+      id: `usr-${Date.now()}`,
+      login,
+      email: email || null,
+      role,
+      active: true,
+      created_at: new Date().toISOString(),
+    };
+
+    return NextResponse.json(newUser, { status: 201 });
+  } catch (error) {
+    return NextResponse.json(
+      { code: 'ERROR', message: 'Failed to create user' },
+      { status: 500 }
+    );
+  }
+}

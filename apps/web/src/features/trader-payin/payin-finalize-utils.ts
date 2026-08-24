@@ -50,16 +50,18 @@ export function finalizePreviewTone(
 }
 
 export function finalizeOptionsForOrder(order: Pick<TraderPayInOrderDto, 'status'>): FinalizeKind[] {
-  if (
-    order.status === PayInOrderStatus.NEW ||
-    order.status === PayInOrderStatus.VERIFIED
-  ) {
-    return ['paid', 'adjustment', 'cancel'];
+  const isTerminal = 
+    order.status === PayInOrderStatus.PAID ||
+    order.status === PayInOrderStatus.UNDERPAID ||
+    order.status === PayInOrderStatus.OVERPAID ||
+    order.status === PayInOrderStatus.CANCELED;
+  
+  if (isTerminal) {
+    return [];
   }
-  if (order.status === PayInOrderStatus.CANCELED) {
-    return ['paid', 'adjustment'];
-  }
-  return [];
+  
+  // For all non-terminal statuses, show all options
+  return ['paid', 'adjustment', 'cancel'];
 }
 
 export function orderPayinProofFileIds(row: {

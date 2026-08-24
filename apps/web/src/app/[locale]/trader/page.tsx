@@ -6,15 +6,17 @@ import {
   ShoppingCart,
   CheckCircle2,
   CreditCard,
+  ArrowDownToLine,
+  DollarSign,
 } from 'lucide-react';
 import { useTranslations } from 'next-intl';
+import Link from 'next/link';
 import { StatCard } from '@/components/ui/card';
 import { api } from '@/lib/api';
 import { internalPaths } from '@/lib/internal-api';
 import { traderKeys } from '@/lib/query-keys';
 import { formatCurrency } from '@/lib/utils';
 import { statCardToneAt } from '@/lib/surface-ring';
-import { TraderDashboardWalletListSection } from '@/features/trader-dashboard/wallet-list-section';
 
 interface DashboardStats {
   total_volume: number;
@@ -24,6 +26,7 @@ interface DashboardStats {
   currency: string;
   accepting_orders?: boolean;
   account_active?: boolean;
+  balance_usdt?: number;
 }
 
 export default function TraderDashboard() {
@@ -52,6 +55,40 @@ export default function TraderDashboard() {
           {stats?.account_active === false ? t('pausedAdmin') : t('pausedSelf')}
         </div>
       )}
+
+      {/* Large balance card */}
+      <div className="rounded-2xl border border-border-primary bg-gradient-to-br from-accent-blue/10 via-accent-blue/5 to-transparent p-6">
+        <div className="flex items-center justify-between">
+          <div>
+            <p className="text-sm font-medium text-text-muted">{t('usdtBalance')}</p>
+            <p className="mt-1 text-4xl font-bold text-text-primary tracking-tight">
+              {statsLoading ? (
+                <span className="text-text-muted">...</span>
+              ) : (
+                <span className="text-accent-green font-extrabold">
+                  {formatCurrency(stats?.balance_usdt ?? 0, 'USDT')}
+                </span>
+              )}
+            </p>
+          </div>
+          <DollarSign className="h-12 w-12 text-accent-blue/30" />
+        </div>
+        <div className="mt-5 flex gap-3">
+          <Link
+            href="/trader/topup"
+            className="inline-flex items-center gap-2 rounded-lg bg-accent-blue px-4 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-accent-blue/90"
+          >
+            <ArrowDownToLine className="h-4 w-4" />
+            {t('topUp')}
+          </Link>
+          <Link
+            href="/trader/balance"
+            className="inline-flex items-center gap-2 rounded-lg border border-border-primary bg-bg-secondary px-4 py-2.5 text-sm font-semibold text-text-primary transition-colors hover:bg-bg-hover"
+          >
+            {t('history')}
+          </Link>
+        </div>
+      </div>
 
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
         <StatCard
@@ -83,8 +120,6 @@ export default function TraderDashboard() {
           tone={statCardToneAt(3)}
         />
       </div>
-
-      <TraderDashboardWalletListSection />
     </div>
   );
 }

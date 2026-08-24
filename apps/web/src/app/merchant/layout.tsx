@@ -8,6 +8,7 @@ import {
   Webhook,
   BarChart3,
   Percent,
+  BookOpen,
 } from 'lucide-react';
 import { useQueryClient } from '@tanstack/react-query';
 import { UserRole } from '@p2p/shared';
@@ -25,6 +26,7 @@ const navItems: NavItem[] = [
   { label: 'API Keys', href: '/merchant/api-keys', icon: Key },
   { label: 'Webhooks', href: '/merchant/webhooks', icon: Webhook },
   { label: 'Analytics', href: '/merchant/analytics', icon: BarChart3 },
+  { label: 'Документация', href: '/merchant/docs', icon: BookOpen },
 ];
 
 export default function MerchantLayout({ children }: { children: React.ReactNode }) {

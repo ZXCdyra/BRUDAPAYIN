@@ -149,7 +149,7 @@ export default function LoginPage() {
               <Input
                 label="Логин"
                 type="text"
-                placeholder="Например, merchant"
+                placeholder="Логин"
                 value={login}
                 onChange={(e) => {
                   setLogin(e.target.value);
