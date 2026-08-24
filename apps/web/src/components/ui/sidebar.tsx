@@ -21,14 +21,14 @@ import { useAuth } from '@/hooks/use-auth';
 import { isNavHrefActive } from '@/lib/nav-active';
 
 const traderNavItems = [
-  { label: 'Dashboard', href: '/trader', icon: LayoutDashboard },
-  { label: 'Pay-In', href: '/trader/payin', icon: ArrowDownToLine },
-  { label: 'Pay-Out', href: '/trader/payout', icon: ArrowUpFromLine },
-  { label: 'Requisites', href: '/trader/requisites', icon: CreditCard },
-  { label: 'Appeals', href: '/trader/appeals', icon: MessageSquareWarning },
-  { label: 'Statistics', href: '/trader/statistics', icon: BarChart3 },
-  { label: 'Telegram', href: '/trader/telegram', icon: Send },
-  { label: 'Settings', href: '/trader/settings', icon: Settings },
+  { label: 'Dashboard', href: '/ru/trader', icon: LayoutDashboard },
+  { label: 'Pay-In', href: '/ru/trader/payin', icon: ArrowDownToLine },
+  { label: 'Pay-Out', href: '/ru/trader/payout', icon: ArrowUpFromLine },
+  { label: 'Requisites', href: '/ru/trader/requisites', icon: CreditCard },
+  { label: 'Appeals', href: '/ru/trader/appeals', icon: MessageSquareWarning },
+  { label: 'Statistics', href: '/ru/trader/statistics', icon: BarChart3 },
+  { label: 'Telegram', href: '/ru/trader/telegram', icon: Send },
+  { label: 'Settings', href: '/ru/trader/settings', icon: Settings },
 ];
 
 export function Sidebar() {

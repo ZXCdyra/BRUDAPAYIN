@@ -59,28 +59,28 @@ export default function SupportDashboard() {
           title="Active Disputes"
           value={stats?.activeDisputes ?? '—'}
           icon={AlertTriangle}
-          href="/support/disputes"
+          href="/ru/support/disputes"
           tone={stats?.activeDisputes ? 'rose' : statCardToneAt(0)}
         />
         <StatCard
           title="Orders Needing Attention"
           value={stats?.ordersNeedingAttention ?? '—'}
           icon={FileText}
-          href="/support/orders"
+          href="/ru/support/orders"
           tone={statCardToneAt(1)}
         />
         <StatCard
           title="Avg Resolution Time"
           value={stats?.avgResolutionTime ?? '—'}
           icon={Clock}
-          href="/support/disputes"
+          href="/ru/support/disputes"
           tone={statCardToneAt(2)}
         />
         <StatCard
           title="Resolved Today"
           value={stats?.resolvedToday ?? '—'}
           icon={MessageSquare}
-          href="/support/disputes"
+          href="/ru/support/disputes"
           tone={statCardToneAt(3)}
         />
       </div>

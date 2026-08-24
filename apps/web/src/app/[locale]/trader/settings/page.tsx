@@ -101,7 +101,7 @@ export default function SettingsPage() {
         ) : null}
         <p className="mt-4 text-sm">
           <Link
-            href="/trader/requisites"
+            href="/ru/trader/requisites"
             className="text-accent-blue underline-offset-2 hover:underline"
           >
             {t('requisiteLink')}

@@ -957,6 +957,7 @@ export function StaffUserAccountsPanel({ queryKeyPrefix }: StaffUserAccountsPane
         title="Create User"
       >
         <form
+          key={`create-user-form-${form.role}`}
           className="space-y-4"
           onSubmit={(e) => {
             e.preventDefault();

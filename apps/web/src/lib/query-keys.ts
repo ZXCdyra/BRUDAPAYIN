@@ -203,6 +203,7 @@ export const adminKeys = {
   audit: (filters: unknown) => [...adminRoot, 'audit', filters] as const,
   orders: (filters: unknown) => [...adminRoot, 'orders', filters] as const,
   ordersScope: [...adminRoot, 'orders'] as const,
+  incomingTraffic: () => [...adminRoot, 'incoming-traffic'] as const,
   tradersOptions: () => [...adminRoot, 'traders', 'options'] as const,
   statistics: () => [...adminRoot, 'statistics'] as const,
   ordersLogs: (filters: unknown) => [...adminRoot, 'orders-logs', filters] as const,

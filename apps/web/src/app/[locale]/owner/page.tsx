@@ -46,28 +46,28 @@ export default function OwnerDashboard() {
           title="Total Users"
           value={stats?.totalUsers ?? '—'}
           icon={Users}
-          href="/owner/users"
+          href="/ru/owner/users"
           tone={statCardToneAt(0)}
         />
         <StatCard
           title="Merchants"
           value={stats?.totalMerchants ?? '—'}
           icon={Store}
-          href="/owner/users"
+          href="/ru/owner/users"
           tone={statCardToneAt(1)}
         />
         <StatCard
           title="Total Orders"
           value={stats?.totalOrders?.toLocaleString() ?? '—'}
           icon={FileText}
-          href="/owner/orders"
+          href="/ru/owner/orders"
           tone={statCardToneAt(2)}
         />
         <StatCard
           title="Total Volume"
           value={stats?.totalVolume ? `$${stats.totalVolume.toLocaleString()}` : '—'}
           icon={TrendingUp}
-          href="/owner/statistics"
+          href="/ru/owner/statistics"
           tone={statCardToneAt(3)}
         />
       </div>
@@ -77,28 +77,28 @@ export default function OwnerDashboard() {
           title="Active Pay-Ins"
           value={stats?.activePayins ?? '—'}
           icon={ArrowDownLeft}
-          href="/owner/orders"
+          href="/ru/owner/orders"
           tone={statCardToneAt(4)}
         />
         <StatCard
           title="Active Pay-Outs"
           value={stats?.activePayouts ?? '—'}
           icon={ArrowUpRight}
-          href="/owner/orders"
+          href="/ru/owner/orders"
           tone={statCardToneAt(5)}
         />
         <StatCard
           title="Pending Settlements"
           value={stats?.pendingSettlements ?? '—'}
           icon={Wallet}
-          href="/owner/settlements"
+          href="/ru/owner/settlements"
           tone={statCardToneAt(6)}
         />
         <StatCard
           title="Open Disputes"
           value={stats?.disputesCount ?? '—'}
           icon={AlertTriangle}
-          href="/owner/orders"
+          href="/ru/owner/orders"
           tone={stats?.disputesCount ? 'rose' : statCardToneAt(7)}
         />
       </div>

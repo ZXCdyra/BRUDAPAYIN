@@ -22,7 +22,7 @@ export function AuthGuard({ children, allowedRoles }: AuthGuardProps) {
   useEffect(() => {
     if (isLoading) return;
     if (!isAuthenticated || !user) {
-      router.replace('/login');
+      router.replace('/ru/login');
       return;
     }
     if (allowedRoles.length > 0 && !allowedRoles.includes(user.role)) {

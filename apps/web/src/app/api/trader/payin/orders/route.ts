@@ -8,30 +8,33 @@ export async function GET(request: NextRequest) {
   const status = searchParams.get('status') || undefined;
 
   // Simulate fetching orders
+  // Pay-In execution time: 10 minutes (600 seconds)
+  const PAYIN_EXECUTION_SECONDS = 600;
+  const now = Math.floor(Date.now() / 1000);
   const allOrders = [
     {
       id: 'ord-p001',
       amount: 5000,
       currency: 'RUB',
       status: 'PENDING',
-      created_at: new Date(Date.now() - 600000).toISOString(),
-      autoclose_at: Math.floor(Date.now() / 1000) + 1800,
+      created_at: new Date(now * 1000 - 300000).toISOString(),
+      autoclose_at: now + PAYIN_EXECUTION_SECONDS,
     },
     {
       id: 'ord-p002',
       amount: 12000,
       currency: 'RUB',
       status: 'NEW',
-      created_at: new Date(Date.now() - 3600000).toISOString(),
-      autoclose_at: Math.floor(Date.now() / 1000) + 3600,
+      created_at: new Date(now * 1000 - 600000).toISOString(),
+      autoclose_at: now + PAYIN_EXECUTION_SECONDS,
     },
     {
       id: 'ord-p003',
       amount: 8500,
       currency: 'RUB',
       status: 'VERIFIED',
-      created_at: new Date(Date.now() - 7200000).toISOString(),
-      autoclose_at: Math.floor(Date.now() / 1000) + 5400,
+      created_at: new Date(now * 1000 - 900000).toISOString(),
+      autoclose_at: now + PAYIN_EXECUTION_SECONDS,
     },
   ];
 

@@ -62,7 +62,7 @@ export function TraderHeaderCapacityAlerts() {
   return (
     <Tooltip content={tooltip} side="bottom" wide>
       <Link
-        href="/trader/balance"
+        href="/ru/trader/balance"
         className={clsx(
           'inline-flex max-w-[min(100%,28rem)] shrink-0 items-center gap-2 rounded-lg px-3 py-1.5 text-xs font-semibold transition-colors sm:text-sm',
           exhausted

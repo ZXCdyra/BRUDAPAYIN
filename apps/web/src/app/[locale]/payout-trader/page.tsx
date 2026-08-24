@@ -92,7 +92,7 @@ export default function PayoutTraderDashboardPage() {
           <p className="font-medium text-text-primary">Working queue</p>
           <p className="text-sm text-text-muted">Take orders from your pool, then confirm or fail in Pay-Out.</p>
         </div>
-        <Link href="/payout-trader/payout" className="inline-block">
+        <Link href="/ru/payout-trader/payout" className="inline-block">
           <Button>
             <ArrowUpFromLine className="h-4 w-4" />
             Open Pay-Out

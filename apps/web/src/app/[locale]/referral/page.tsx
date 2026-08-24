@@ -92,7 +92,7 @@ export default function ReferralDashboard() {
         <div className="mb-4 flex items-center justify-between">
           <h2 className="text-base font-semibold text-text-primary">Referred Users</h2>
           <a
-            href="/referral/statistics"
+            href="/ru/referral/statistics"
             className="text-sm text-accent-blue hover:underline"
           >
             View full statistics →

@@ -17,12 +17,12 @@ import { usePayOutSpecialistRealtime, usePayoutTraderTelegramRealtime } from '@/
 const PAYOUT_TRADER_ALLOWED = [UserRole.PAYOUT_TRADER] as const;
 
 const navItems: NavItem[] = [
-  { label: 'Dashboard', href: '/payout-trader', icon: LayoutDashboard },
-  { label: 'Pay-Out', href: '/payout-trader/payout', icon: ArrowUpFromLine, navBadge: 'payout-pool' },
-  { label: 'Statistics', href: '/payout-trader/statistics', icon: BarChart3 },
-  { label: 'Balance', href: '/payout-trader/balance', icon: Wallet },
-  { label: 'Telegram', href: '/payout-trader/telegram', icon: Send },
-  { label: 'Notifications', href: '/payout-trader/notifications', icon: Bell },
+  { label: 'Dashboard', href: '/ru/payout-trader', icon: LayoutDashboard },
+  { label: 'Pay-Out', href: '/ru/payout-trader/payout', icon: ArrowUpFromLine, navBadge: 'payout-pool' },
+  { label: 'Statistics', href: '/ru/payout-trader/statistics', icon: BarChart3 },
+  { label: 'Balance', href: '/ru/payout-trader/balance', icon: Wallet },
+  { label: 'Telegram', href: '/ru/payout-trader/telegram', icon: Send },
+  { label: 'Notifications', href: '/ru/payout-trader/notifications', icon: Bell },
 ];
 
 export default function PayoutTraderLayout({ children }: { children: React.ReactNode }) {

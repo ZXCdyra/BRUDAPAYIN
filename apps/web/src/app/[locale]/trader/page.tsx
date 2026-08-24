@@ -75,14 +75,14 @@ export default function TraderDashboard() {
         </div>
         <div className="mt-5 flex gap-3">
           <Link
-            href="/trader/topup"
+            href="/ru/trader/topup"
             className="inline-flex items-center gap-2 rounded-lg bg-accent-blue px-4 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-accent-blue/90"
           >
             <ArrowDownToLine className="h-4 w-4" />
             {t('topUp')}
           </Link>
           <Link
-            href="/trader/balance"
+            href="/ru/trader/balance"
             className="inline-flex items-center gap-2 rounded-lg border border-border-primary bg-bg-secondary px-4 py-2.5 text-sm font-semibold text-text-primary transition-colors hover:bg-bg-hover"
           >
             {t('history')}
@@ -95,28 +95,28 @@ export default function TraderDashboard() {
           title={t('statTotalVolume')}
           value={statsLoading ? '...' : formatCurrency(stats?.total_volume ?? 0, stats?.currency)}
           icon={TrendingUp}
-          href="/trader/statistics"
+          href="/ru/trader/statistics"
           tone={statCardToneAt(0)}
         />
         <StatCard
           title={t('statOrdersToday')}
           value={statsLoading ? '...' : (stats?.orders_today ?? 0)}
           icon={ShoppingCart}
-          href="/trader/payin"
+          href="/ru/trader/payin"
           tone={statCardToneAt(1)}
         />
         <StatCard
           title={t('statSuccessRate')}
           value={statsLoading ? '...' : `${(stats?.success_rate ?? 0).toFixed(1)}%`}
           icon={CheckCircle2}
-          href="/trader/statistics"
+          href="/ru/trader/statistics"
           tone={statCardToneAt(2)}
         />
         <StatCard
           title={t('statActiveRequisites')}
           value={statsLoading ? '...' : (stats?.active_requisites ?? 0)}
           icon={CreditCard}
-          href="/trader/requisites"
+          href="/ru/trader/requisites"
           tone={statCardToneAt(3)}
         />
       </div>

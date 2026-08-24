@@ -10,12 +10,12 @@ import { useStaffOrdersRealtime } from '@/lib/payin-realtime';
 const SUPPORT_ALLOWED = [UserRole.SUPPORT] as const;
 
 const navItems: NavItem[] = [
-  { label: 'Dashboard', href: '/support', icon: LayoutDashboard },
-  { label: 'Orders', href: '/support/orders', icon: FileText },
-  { label: 'Disputes', href: '/support/disputes', icon: AlertTriangle },
-  { label: 'Balances', href: '/support/balances', icon: Wallet },
-  { label: 'Cascade', href: '/support/cascade', icon: GitFork },
-  { label: 'Cascade requisites', href: '/support/cascade/requisites', icon: Table2 },
+  { label: 'Dashboard', href: '/ru/support', icon: LayoutDashboard },
+  { label: 'Orders', href: '/ru/support/orders', icon: FileText },
+  { label: 'Disputes', href: '/ru/support/disputes', icon: AlertTriangle },
+  { label: 'Balances', href: '/ru/support/balances', icon: Wallet },
+  { label: 'Cascade', href: '/ru/support/cascade', icon: GitFork },
+  { label: 'Cascade requisites', href: '/ru/support/cascade/requisites', icon: Table2 },
 ];
 
 export default function SupportLayout({ children }: { children: React.ReactNode }) {

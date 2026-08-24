@@ -3,7 +3,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useState } from 'react';
 import { useTranslations } from 'next-intl';
-import { Search, CheckCircle2, XCircle, Clock, Loader2 } from 'lucide-react';
+import { Search, CheckCircle2, XCircle } from 'lucide-react';
 import { DataTable } from '@/components/ui/data-table';
 import { PaginationControls } from '@/components/ui/pagination-controls';
 import { api } from '@/lib/api';
@@ -209,28 +209,20 @@ export default function AdminOrdersPage() {
                 render: (order: OrderRow) => (
                   <div className="flex items-center justify-end gap-1">
                     <button
-                      onClick={() => updateStatusMutation.mutate({ orderId: order.id, status: 'COMPLETED', comment: 'Удачная' })}
+                      onClick={() => updateStatusMutation.mutate({ orderId: order.id, status: 'COMPLETED', comment: 'Оплачен' })}
                       disabled={updateStatusMutation.isPending}
                       className="inline-flex items-center gap-1 rounded-md bg-green-500/10 px-2 py-1 text-xs font-medium text-green-400 hover:bg-green-500/20 disabled:opacity-50"
                     >
                       <CheckCircle2 className="h-3 w-3" />
-                      Удачная
+                      Оплачен
                     </button>
                     <button
-                      onClick={() => updateStatusMutation.mutate({ orderId: order.id, status: 'EXPIRED', comment: 'Истекшая' })}
-                      disabled={updateStatusMutation.isPending}
-                      className="inline-flex items-center gap-1 rounded-md bg-yellow-500/10 px-2 py-1 text-xs font-medium text-yellow-400 hover:bg-yellow-500/20 disabled:opacity-50"
-                    >
-                      <Clock className="h-3 w-3" />
-                      Истекшая
-                    </button>
-                    <button
-                      onClick={() => updateStatusMutation.mutate({ orderId: order.id, status: 'CANCELED', comment: 'Отменена' })}
+                      onClick={() => updateStatusMutation.mutate({ orderId: order.id, status: 'CANCELED', comment: 'Отменен' })}
                       disabled={updateStatusMutation.isPending}
                       className="inline-flex items-center gap-1 rounded-md bg-red-500/10 px-2 py-1 text-xs font-medium text-red-400 hover:bg-red-500/20 disabled:opacity-50"
                     >
                       <XCircle className="h-3 w-3" />
-                      Отменена
+                      Отменен
                     </button>
                   </div>
                 ),

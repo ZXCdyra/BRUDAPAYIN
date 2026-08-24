@@ -60,8 +60,8 @@ export function finalizeOptionsForOrder(order: Pick<TraderPayInOrderDto, 'status
     return [];
   }
   
-  // For all non-terminal statuses, show all options
-  return ['paid', 'adjustment', 'cancel'];
+  // Traders cannot change order status — only merchants and admins can.
+  return [];
 }
 
 export function orderPayinProofFileIds(row: {

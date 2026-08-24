@@ -1,17 +1,19 @@
 'use client';
 
 import { useEffect, useMemo, useState } from 'react';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useDebouncedTextFilter } from '@/lib/hooks/use-debounced-value';
-import { ArrowLeftRight } from 'lucide-react';
+import { ArrowLeftRight, CheckCircle2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import {
   FiltersToggleButton,
   ListPageHeader,
   SearchStatusRow,
+  ListPageRefreshButton,
 } from '@/components/ui/list-page-tools';
 import { api } from '@/lib/api';
+import { toast } from '@/components/ui/toast';
 import { internalPaths } from '@/lib/internal-api';
 import { merchantKeys } from '@/lib/query-keys';
 import { buildQueryString, formatDateTime } from '@/lib/utils';
@@ -24,6 +26,7 @@ import { Tabs } from '@/components/ui/tabs';
 import { FilterInput } from '@/components/ui/filters';
 import {
   ORDER_LIST_UI_TAB,
+  PayInOrderStatus,
   orderListUiTabToDirection,
   type OrderListUiTab,
   type PaymentDetailsShortDto,
@@ -56,6 +59,7 @@ interface MerchantOrdersResponse {
 }
 
 export default function MerchantOrdersPage() {
+  const queryClient = useQueryClient();
   const [tab, setTab] = useState<OrderListUiTab>(ORDER_LIST_UI_TAB.PAY_IN);
   const [page, setPage] = useState(1);
   const [statusFilter, setStatusFilter] = useState('');
@@ -69,6 +73,18 @@ export default function MerchantOrdersPage() {
   const [showFilters, setShowFilters] = useState(false);
 
   const direction = orderListUiTabToDirection(tab);
+
+  const markAsPaidMutation = useMutation({
+    mutationFn: (orderId: string) =>
+      api.post(`${internalPaths.merchantOrders('')}/${orderId}/confirm`),
+    onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: merchantKeys.ordersScope });
+      toast.success('Order marked as paid');
+    },
+    onError: () => {
+      toast.error('Failed to mark order as paid');
+    },
+  });
 
   useEffect(() => {
     setPage(1);
@@ -174,6 +190,38 @@ export default function MerchantOrdersPage() {
         </span>
       ),
     },
+    ...(tab === ORDER_LIST_UI_TAB.PAY_IN
+      ? [
+          {
+            key: 'actions',
+            header: 'Actions',
+            className: 'text-end',
+            render: (row: MerchantOrder) => {
+              const canMarkPaid =
+                row.status === PayInOrderStatus.PENDING ||
+                row.status === PayInOrderStatus.NEW ||
+                row.status === PayInOrderStatus.VERIFIED ||
+                row.status === PayInOrderStatus.UNDERPAID ||
+                row.status === PayInOrderStatus.OVERPAID;
+              if (!canMarkPaid) return null;
+              return (
+                <div className="flex justify-end" onClick={(e) => e.stopPropagation()}>
+                  <Button
+                    size="sm"
+                    variant="primary"
+                    className="gap-1 !py-1 !text-xs"
+                    disabled={markAsPaidMutation.isPending}
+                    icon={<CheckCircle2 className="h-3 w-3" />}
+                    onClick={() => markAsPaidMutation.mutate(row.id)}
+                  >
+                    Оплачен
+                  </Button>
+                </div>
+              );
+            },
+          },
+        ]
+      : []),
   ];
 
   return (
@@ -188,6 +236,11 @@ export default function MerchantOrdersPage() {
         description="View and track your payment orders"
         actions={
           <>
+            <ListPageRefreshButton
+              onRefresh={() =>
+                void queryClient.invalidateQueries({ queryKey: merchantKeys.ordersScope })
+              }
+            />
             <Tabs
               tabs={[
                 { key: ORDER_LIST_UI_TAB.PAY_IN, label: 'Pay-In' },

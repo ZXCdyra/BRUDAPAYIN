@@ -395,7 +395,7 @@ export default function SettlementsPage() {
             DEBIT balance lines (audit comment required). Pick a trader under{' '}
             <Link
               className="underline text-accent-blue hover:text-accent-blue/90"
-              href="/admin/users"
+              href="/ru/admin/users"
             >
               Users
             </Link>

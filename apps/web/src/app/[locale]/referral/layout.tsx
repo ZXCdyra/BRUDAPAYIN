@@ -8,8 +8,8 @@ import { DashboardShell, type NavItem } from '@/components/dashboard-shell';
 const REFERRAL_ALLOWED = [UserRole.REFERRAL] as const;
 
 const navItems: NavItem[] = [
-  { label: 'Dashboard', href: '/referral', icon: LayoutDashboard },
-  { label: 'Statistics', href: '/referral/statistics', icon: BarChart3 },
+  { label: 'Dashboard', href: '/ru/referral', icon: LayoutDashboard },
+  { label: 'Statistics', href: '/ru/referral/statistics', icon: BarChart3 },
 ];
 
 export default function ReferralLayout({ children }: { children: React.ReactNode }) {
